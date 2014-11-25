@@ -39,8 +39,9 @@ with open(pjoin(here, 'sudospawner/version.py')) as f:
 setup_args = dict(
     name                = 'sudospawner',
     packages            = ['sudospawner'],
+    scripts             = ['scripts/sudospawner'],
     version             = version_ns['__version__'],
-    description         = """SudoSpawner: A custom spawner for Jupyterhub.""",
+    description         = """SudoSpawner: A custom spawner for JupyterHub.""",
     long_description    = "",
     author              = "Jupyter Development Team",
     author_email        = "jupyter@googlegroups.com",

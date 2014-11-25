@@ -1,0 +1,4 @@
+#!/usr/bin/env python3
+
+from sudospawner import mediator
+mediator.main()

@@ -1,86 +1,66 @@
 """A Spawner for JupyterHub to allow the Hub to be run as non-root.
 
-This spawns a separate service *as root*, which 
+This spawns a mediator process with sudo, which then takes actions on behalf of the user.
 """
 
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+
+
 import json
-import socket
+from subprocess import Popen, PIPE
 
 from tornado import gen
-from tornado.httpclient import HTTPRequest, AsyncHTTPClient, HTTPError
-from tornado.netutil import Resolver
+from tornado.concurrent import Future
+from tornado.process import Subprocess
 
+from IPython.utils.traitlets import List, Unicode, Bool
 
-from jupyterhub.spawner import Spawner
+from jupyterhub.spawner import LocalProcessSpawner
 from jupyterhub.utils import random_port
 
-from IPython.utils.traitlets import Instance, Unicode
-
-class UnixResolver(Resolver):
-    """UnixResolver based on https://gist.github.com/bdarnell/8641880"""
-    def initialize(self, resolver, unix_mappings, **kwargs):
-        self.resolver = resolver
-        self.unix_mappings = unix_mappings
-        super().initialize(**kwargs)
+class SudoSpawner(LocalProcessSpawner):
     
-    def close(self):
-        self.resolver.close()
- 
-    @gen.coroutine
-    def resolve(self, host, port, *args, **kwargs):
-        if host in self.unix_mappings:
-            return [(socket.AF_UNIX, self.unix_mappings[host])]
+    sudospawner_path = Unicode('sudospawner', config=True,
+        help="Path to sudospawner script"
+    )
+    sudo_args = List(Unicode, config=True,
+        help="Extra args to pass to sudo"
+    )
+    debug_mediator = Bool(True, config=True,
+        help="Extra log output from the mediator process for debugging",
+    )
+    
+    def do(self, action, **kwargs):
+        """Instruct the mediator process to take a given action"""
+        kwargs['action'] = action
+        cmd = ['sudo', '-u', self.user.name]
+        cmd.extend(self.sudo_args)
+        cmd.append(self.sudospawner_path)
+        if self.debug_mediator:
+            cmd.append('--logging=debug')
         
-        f = yield self.resolver.resolve(host, port, *args, **kwargs)
+        p = Popen(cmd, stdin=PIPE, stdout=PIPE)
+        data = json.dumps(kwargs).encode('utf8')
+        stdout, _ = p.communicate(data)
+        f = Future()
+        f.set_result(json.loads(stdout.decode('utf8')))
+        # def finish(returncode):
+        #     buf = p.stdout.read().decode('utf8')
+        #     f.set_result(json.loads(buf))
+        #
+        # p.set_exit_callback(finish)
         return f
 
-
-class SudoSpawner(Spawner):
-    
-    client = Instance(AsyncHTTPClient)
-    def _client_default(self):
-        resolver = UnixResolver(
-            resolver=Resolver(),
-            unix_mappings={
-                'jupytersudospawner': self.sock
-            },
-        )
-        return AsyncHTTPClient(resolver=resolver)
-    
-    sock = Unicode('/tmp/sudospawner')
-    auth_token = Unicode()
-    
-    @property
-    def url(self):
-        return "http://jupytersudospawner/users/" + self.user.name
-    
-    def request(self, method, body=None):
-        req = HTTPRequest(self.url,
-            method=method,
-            headers={'Authorization': 'token {}'.format(self.auth_token)},
-            body=body,
-        )
-        # import IPython
-        # IPython.embed()
-        return self.client.fetch(req)
-    
     @gen.coroutine
     def start(self):
         self.user.server.port = random_port()
-        body = json.dumps(dict(
-            args=self.get_args(),
-            env=self.env,
-        ))
-        resp = yield self.request('POST', body)
-    
-    @gen.coroutine
-    def stop(self, now=False):
-        resp = yield self.request('DELETE')
+        # only args, not the base command
+        reply = yield self.do(action='spawn', args=self.get_args(), env=self.env)
+        self.pid = reply['pid']
 
     @gen.coroutine
-    def poll(self):
-        resp = yield self.request('GET')
-        reply = json.loads(resp.body.decode('utf8'))
-        return reply['status']
-    
-    
+    def _signal(self, sig):
+        reply = yield self.do('kill', pid=self.pid, signal=sig)
+        return reply['alive']
+
