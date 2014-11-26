@@ -22,4 +22,7 @@ Tell JupyterHub to use SudoSpawner, by adding the following to your `jupyterhub_
 
     c.JupyterHubApp.spawner_class='sudospawner.SudoSpawner'
 
+## example
 
+The Dockerfile in this repo contains an example config for setting up a JupyterHub system,
+without any need to run anything as root.
