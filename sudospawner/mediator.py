@@ -104,7 +104,12 @@ def main():
     """parse JSON from stdin, and take the appropriate action"""
     parse_command_line()
     app_log.debug("Starting mediator for %s", getpass.getuser())
-    kwargs = json.load(sys.stdin)
+    try:
+        kwargs = json.load(sys.stdin)
+    except ValueError as e:
+        app_log.error("Expected JSON on stdin, got %s" % e)
+        sys.exit(1)
+    
     action = kwargs.pop('action')
     if action == 'kill':
         kill(**kwargs)
