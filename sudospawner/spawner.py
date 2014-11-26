@@ -24,10 +24,10 @@ class SudoSpawner(LocalProcessSpawner):
     sudospawner_path = Unicode('sudospawner', config=True,
         help="Path to sudospawner script"
     )
-    sudo_args = List(Unicode, config=True,
+    sudo_args = List(['-nH'], config=True,
         help="Extra args to pass to sudo"
     )
-    debug_mediator = Bool(True, config=True,
+    debug_mediator = Bool(False, config=True,
         help="Extra log output from the mediator process for debugging",
     )
     

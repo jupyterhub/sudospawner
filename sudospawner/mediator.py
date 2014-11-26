@@ -28,9 +28,9 @@ from tornado.options import parse_command_line
 app_log = log.app_log
 
 
-def finish(data):
+def finish(data, fp=sys.stdout):
     """write JSON to stdout"""
-    json.dump(data, sys.stdout)
+    json.dump(data, fp)
     app_log.debug("mediator result: %s", data)
     sys.stdout.flush()
 
@@ -48,9 +48,7 @@ def kill(pid, signal):
             raise
     else:
         alive = True
-    
     finish({'alive': alive})
-
 
 def spawn(args, env):
     """spawn a single-user server
@@ -66,8 +64,40 @@ def spawn(args, env):
         app_log.warn("PYTHONPATH env not allowed for security reasons")
         env.pop('PYTHONPATH')
     
-    p = Popen(cmd, env=env, stdout=open(os.devnull, 'w'))
-    finish({'pid': p.pid})
+    # use fork to prevent zombie process
+    # create pipe to get PID from descendant
+    r, w = os.pipe()
+    if os.fork(): # parent
+        # wait for data on pipe and relay it to stdout
+        os.close(w)
+        r = os.fdopen(r)
+        sys.stdout.write(r.read())
+    else:
+        os.close(r)
+        
+        # don't inherit signals from Hub
+        os.setpgrp()
+        
+        # detach child FDs, to allow parent process to exit while child waits
+        null = os.open(os.devnull, os.O_RDWR)
+        for fp in [sys.stdin, sys.stdout, sys.stderr]:
+            os.dup2(null, fp.fileno())
+        os.close(null)
+        
+        # launch the single-user server from the subprocess
+        # TODO: If we want to see single-user log output,
+        # we should send stderr to a file
+        p = Popen(cmd, env=env,
+            cwd=os.path.expanduser('~'),
+            stdout=open(os.devnull, 'w'),
+        )
+        # pipe finish message to parent
+        w = os.fdopen(w, 'w')
+        finish({'pid': p.pid}, w)
+        w.close()
+        
+        # wait for subprocess, so it doesn't get zombified
+        p.wait()
 
 
 def main():
