@@ -8,10 +8,8 @@ This spawns a mediator process with sudo, which then takes actions on behalf of 
 
 
 import json
-from subprocess import Popen, PIPE
 
 from tornado import gen
-from tornado.concurrent import Future
 from tornado.process import Subprocess
 
 from IPython.utils.traitlets import List, Unicode, Bool
@@ -31,6 +29,7 @@ class SudoSpawner(LocalProcessSpawner):
         help="Extra log output from the mediator process for debugging",
     )
     
+    @gen.coroutine
     def do(self, action, **kwargs):
         """Instruct the mediator process to take a given action"""
         kwargs['action'] = action
@@ -40,17 +39,11 @@ class SudoSpawner(LocalProcessSpawner):
         if self.debug_mediator:
             cmd.append('--logging=debug')
         
-        p = Popen(cmd, stdin=PIPE, stdout=PIPE)
-        data = json.dumps(kwargs).encode('utf8')
-        stdout, _ = p.communicate(data)
-        f = Future()
-        f.set_result(json.loads(stdout.decode('utf8')))
-        # def finish(returncode):
-        #     buf = p.stdout.read().decode('utf8')
-        #     f.set_result(json.loads(buf))
-        #
-        # p.set_exit_callback(finish)
-        return f
+        p = Subprocess(cmd, stdin=Subprocess.STREAM, stdout=Subprocess.STREAM)
+        yield p.stdin.write(json.dumps(kwargs).encode('utf8'))
+        p.stdin.close()
+        data = yield p.stdout.read_until_close()
+        return json.loads(data.decode('utf8'))
 
     @gen.coroutine
     def start(self):
