@@ -20,7 +20,7 @@ Install:
 
 Tell JupyterHub to use SudoSpawner, by adding the following to your `jupyterhub_config.py`:
 
-    c.JupyterHubApp.spawner_class='sudospawner.SudoSpawner'
+    c.JupyterHub.spawner_class='sudospawner.SudoSpawner'
 
 ## example
 
