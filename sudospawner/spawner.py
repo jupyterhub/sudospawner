@@ -49,7 +49,9 @@ class SudoSpawner(LocalProcessSpawner):
 
     @gen.coroutine
     def start(self):
+        self.user.server.ip = self.ip
         self.user.server.port = random_port()
+        self.db.commit()
         # only args, not the base command
         reply = yield self.do(action='spawn', args=self.get_args(), env=self.env)
         self.pid = reply['pid']
