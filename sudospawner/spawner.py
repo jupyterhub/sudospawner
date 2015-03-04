@@ -43,6 +43,8 @@ class SudoSpawner(LocalProcessSpawner):
         yield p.stdin.write(json.dumps(kwargs).encode('utf8'))
         p.stdin.close()
         data = yield p.stdout.read_until_close()
+        if p.returncode:
+          raise RuntimeError("Spawner subprocess failed with exit code: %r" % p.returncode)
         return json.loads(data.decode('utf8'))
 
     @gen.coroutine
