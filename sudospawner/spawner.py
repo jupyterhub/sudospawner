@@ -12,7 +12,7 @@ import json
 from tornado import gen
 from tornado.process import Subprocess
 
-from IPython.utils.traitlets import List, Unicode, Bool
+from traitlets import List, Unicode, Bool
 
 from jupyterhub.spawner import LocalProcessSpawner
 from jupyterhub.utils import random_port
