@@ -16,7 +16,7 @@ Install:
 
     pip install -e .
 
-[Add sudo access to the script](https://github.com/jupyter/jupyterhub/wiki/Using-sudo-to-run-the-server-as-non-root).
+[Add sudo access to the script](https://github.com/jupyter/jupyterhub/wiki/Using-sudo-to-run-JupyterHub-without-root-privileges).
 
 Tell JupyterHub to use SudoSpawner, by adding the following to your `jupyterhub_config.py`:
 
