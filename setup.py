@@ -25,7 +25,8 @@ if os.name in ('nt', 'dos'):
 
 # At least we're on the python version we need, move on.
 
-from distutils.core import setup
+# from distutils.core import setup
+from setuptools import setup
 
 pjoin = os.path.join
 here = os.path.abspath(os.path.dirname(__file__))
