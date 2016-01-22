@@ -25,8 +25,9 @@ if os.name in ('nt', 'dos'):
 
 # At least we're on the python version we need, move on.
 
-# from distutils.core import setup
-from setuptools import setup
+from distutils.core import setup
+if any(cmd in sys.argv for cmd in ['bdist_wheel', 'develop']):
+    import setuptools
 
 pjoin = os.path.join
 here = os.path.abspath(os.path.dirname(__file__))
