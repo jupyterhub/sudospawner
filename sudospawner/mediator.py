@@ -57,7 +57,7 @@ def spawn(args, env):
     Start the single-user server via `python -m jupyterhub.singleuser`,
     and prohibit PYTHONPATH from env for basic protections.
     """
-    cmd = [sys.executable, '-m', 'jupyterhub.singleuser'] + args
+    cmd = ['jupyterhub-singleuser'] + args
     cmd_s = ' '.join(pipes.quote(s) for s in cmd)
     app_log.info("Spawning %s", cmd_s)
     if 'PYTHONPATH' in env:
