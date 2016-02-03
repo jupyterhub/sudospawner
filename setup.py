@@ -44,7 +44,7 @@ setup_args = dict(
     scripts             = ['scripts/sudospawner'],
     version             = version_ns['__version__'],
     description         = """SudoSpawner: A custom spawner for JupyterHub.""",
-    long_description    = "",
+    long_description    = "Spawn single-user servers with sudo.",
     author              = "Jupyter Development Team",
     author_email        = "jupyter@googlegroups.com",
     url                 = "http://jupyter.org",
@@ -62,14 +62,11 @@ setup_args = dict(
 )
 
 # setuptools requirements
-if 'setuptools' in sys.modules and os.path.exists('requirements.txt'):
-    setup_args['install_requires'] = install_requires = []
-    with open('requirements.txt') as f:
-        for line in f.readlines():
-            req = line.strip()
-            if not req or req.startswith(('-e', '#')):
-                continue
-            install_requires.append(req)
+if 'setuptools' in sys.modules:
+    setup_args['install_requires'] = install_requires = [
+        'jupyterhub',
+        'notebook',
+    ]
 
 if __name__ == '__main__':
     setup(**setup_args)
