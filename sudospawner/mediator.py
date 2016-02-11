@@ -50,14 +50,14 @@ def kill(pid, signal):
         alive = True
     finish({'alive': alive})
 
-def spawn(args, env):
+def spawn(singleuser, args, env):
     """spawn a single-user server
     
     Takes args *not including executable* for security reasons.
     Start the single-user server via `python -m jupyterhub.singleuser`,
     and prohibit PYTHONPATH from env for basic protections.
     """
-    cmd = ['jupyterhub-singleuser'] + args
+    cmd = [singleuser] + args
     cmd_s = ' '.join(pipes.quote(s) for s in cmd)
     app_log.info("Spawning %s", cmd_s)
     if 'PYTHONPATH' in env:
@@ -114,9 +114,11 @@ def main():
     if action == 'kill':
         kill(**kwargs)
     elif action == 'spawn':
-        spawn(**kwargs)
+        # sudospawner executable must always be in the same dir as jupyterhub-singleuser,
+        # so we don't allow PATH to change what jupyterhub-singleuser means
+        script = os.path.abspath(sys.argv[0])
+        singleuser = os.path.join(os.path.dirname(script), 'jupyterhub-singleuser')
+        spawn(singleuser, **kwargs)
     else:
         raise TypeError("action must be 'spawn' or 'kill'")
 
-if __name__ == '__main__':
-    main()
