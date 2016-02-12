@@ -64,7 +64,7 @@ setup_args = dict(
 # setuptools requirements
 if 'setuptools' in sys.modules:
     setup_args['install_requires'] = install_requires = [
-        'jupyterhub',
+        'jupyterhub>=0.4',
         'notebook',
     ]
 
