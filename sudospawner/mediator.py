@@ -21,7 +21,7 @@ import pipes
 import os
 import sys
 
-from subprocess import Popen
+from subprocess import Popen, TimeoutExpired
 
 from tornado import log
 from tornado.options import parse_command_line
@@ -77,24 +77,44 @@ def spawn(singleuser, args, env):
         
         # don't inherit signals from Hub
         os.setpgrp()
-        
-        # detach child FDs, to allow parent process to exit while child waits
-        null = os.open(os.devnull, os.O_RDWR)
-        for fp in [sys.stdin, sys.stdout, sys.stderr]:
-            os.dup2(null, fp.fileno())
-        os.close(null)
-        
-        # launch the single-user server from the subprocess
-        # TODO: If we want to see single-user log output,
-        # we should send stderr to a file
-        p = Popen(cmd, env=env,
-            cwd=os.path.expanduser('~'),
-            stdout=open(os.devnull, 'w'),
-        )
-        # pipe finish message to parent
-        w = os.fdopen(w, 'w')
-        finish({'pid': p.pid}, w)
-        w.close()
+        try:
+            # detach child FDs, to allow parent process to exit while child waits
+            null = os.open(os.devnull, os.O_RDWR)
+            os.dup2(null, sys.stdin.fileno())
+            os.close(null)
+            # send stdout to stderr, so it doesn't get conflated with output
+            os.dup2(sys.stderr.fileno(), sys.stdout.fileno())
+
+            # launch the single-user server from the subprocess
+            # TODO: If we want to see single-user log output,
+            # we should send stderr to a file
+            p = Popen(cmd, env=env,
+                cwd=os.path.expanduser('~'),
+                stdout=sys.stderr.fileno(),
+            )
+        except Exception as e:
+            result = {
+                'ok': False,
+                'error': str(e)
+            }
+        else:
+            # give it 1 second to die early
+            try:
+                p.wait(1)
+            except TimeoutExpired:
+                pass
+            if p.returncode:
+                result = {
+                    'ok': False,
+                    'error': 'Exited with status: %s' % p.returncode
+                }
+            else:
+                result = {
+                    'ok': True,
+                    'pid': p.pid
+                }
+        with os.fdopen(w, 'w') as out_pipe:
+            finish(result, out_pipe)
         
         # wait for subprocess, so it doesn't get zombified
         p.wait()
