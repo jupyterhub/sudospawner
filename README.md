@@ -1,28 +1,35 @@
 # SudoSpawner
 
-Enables [JupyterHub](https://github.com/jupyter/jupyterhub) to run without being root,
-by spawning an intermediate process via `sudo`, which takes actions on behalf of the user.
+The SudoSpawner enables [JupyterHub](https://github.com/jupyter/jupyterhub)
+to spawn single-user servers without being root, by spawning an intermediate
+process via `sudo`, which takes actions on behalf of the user.
 
-The sudospawner mediator can only do two things:
+The ``sudospawner`` mediator, the intermediate process, can only do two things:
 
-1. signal processes via os.kill
+1. send a signal to another process using the os.kill() call
 2. spawn single-user servers
 
-The only thing the Hub user needs sudo access for is launching the sudospawner script itself.
+Launching the ``sudospawner`` script is the only action that requires a
+JupyterHub administrator to have ``sudo`` access to execute.
 
-## setup
+## Installation and setup
 
-Install:
+1. Install:
 
-    pip install -e .
+        pip install -e .
 
-[Add sudo access to the script](https://github.com/jupyter/jupyterhub/wiki/Using-sudo-to-run-JupyterHub-without-root-privileges).
+2. [Add sudo access to the script](https://github.com/jupyter/jupyterhub/wiki/Using-sudo-to-run-JupyterHub-without-root-privileges).
 
-Tell JupyterHub to use SudoSpawner, by adding the following to your `jupyterhub_config.py`:
+3. To configure JupyterHub to use SudoSpawner, add the following to your 
+`jupyterhub_config.py`:
 
-    c.JupyterHub.spawner_class='sudospawner.SudoSpawner'
+        c.JupyterHub.spawner_class='sudospawner.SudoSpawner'
+    
+   The [JupyterHub documentation](http://jupyterhub.readthedocs.org/en/latest/index.html)
+   has additional information about [creating a configuration file](http://jupyterhub.readthedocs.org/en/latest/getting-started.html#how-to-configure-jupyterhub),
+   if needed, and [recommended file locations for configuration files](http://jupyterhub.readthedocs.org/en/latest/getting-started.html#file-locations).
 
-## example
+## Example
 
-The Dockerfile in this repo contains an example config for setting up a JupyterHub system,
+The [Dockerfile](https://github.com/jupyter/sudospawner/blob/master/Dockerfile) in this repo contains an example configuration for setting up a JupyterHub system,
 without any need to run anything as root.
