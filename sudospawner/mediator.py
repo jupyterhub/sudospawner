@@ -31,7 +31,10 @@ app_log = log.app_log
 def finish(data, fp=sys.stdout):
     """write JSON to stdout"""
     json.dump(data, fp)
-    app_log.debug("mediator result: %s", data)
+    if data and data['ok']:
+        app_log.debug("mediator result: %s", data)
+    else:
+        app_log.error('mediator result: %s', data)
     sys.stdout.flush()
 
 
