@@ -31,7 +31,7 @@ app_log = log.app_log
 def finish(data, fp=sys.stdout):
     """write JSON to stdout"""
     json.dump(data, fp)
-    if data and data['ok']:
+    if data and data.get('ok'):
         app_log.debug("mediator result: %s", data)
     else:
         app_log.error('mediator result: %s', data)
@@ -51,7 +51,10 @@ def kill(pid, signal):
             raise
     else:
         alive = True
-    finish({'alive': alive})
+    finish({
+        'ok': True,
+        'alive': alive,
+    })
 
 def spawn(singleuser, args, env):
     """spawn a single-user server
