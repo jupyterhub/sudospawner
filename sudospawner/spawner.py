@@ -74,13 +74,14 @@ class SudoSpawner(LocalProcessSpawner):
     @gen.coroutine
     def start(self):
         self.port = random_port()
-        # only args, not the base command
-        reply = yield self.do(action='spawn', args=self.get_args(), env=self.get_env())
-        self.pid = reply['pid']
-        # pre-0.7 JupyterHub:
+        # pre-0.7 JupyterHub, store ip/port in user.server:
         self.user.server.ip = self.ip
         self.user.server.port = self.port
         self.db.commit()
+
+        # only args, not the base command
+        reply = yield self.do(action='spawn', args=self.get_args(), env=self.get_env())
+        self.pid = reply['pid']
         # 0.7 expects ip, port to be returned
         return (self.ip, self.port)
 
