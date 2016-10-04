@@ -6,9 +6,16 @@ and executes one of two actions:
 - kill: send signal to process via os.kill
 - spawn: spawn a single-user server
 
-When spawning, uses `{sys.executable} -m jupyterhub.singleuser`, to ensure
+When spawning, uses `dirname({sudospawner})/jupyterhub-singleuser`, to ensure
 that single-user servers are the only things this script grants permission
 to spawn.
+
+singleuser spawn can be wrapped if dirname({sudospawner})/sudospawner-singleuser
+script is present. This script should generally end in the line:
+
+    exec "$(dirname "$0")/jupyterhub-singleuser" $@
+
+to ensure correct launching of the single-user server.
 """
 
 # Copyright (c) Jupyter Development Team.
@@ -140,10 +147,16 @@ def main():
     if action == 'kill':
         kill(**kwargs)
     elif action == 'spawn':
-        # sudospawner executable must always be in the same dir as jupyterhub-singleuser,
-        # so we don't allow PATH to change what jupyterhub-singleuser means
-        script = os.path.abspath(sys.argv[0])
-        singleuser = os.path.join(os.path.dirname(script), 'jupyterhub-singleuser')
+        # sudospawner executable must always be in the same dir as jupyterhub-singleuser (or sudospawner-singleuser),
+        # so we don't allow PATH env, which the Hub can set, to change what command is launched.
+        script_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
+
+        # If sudospawner-singleuser is present, launch that instead.
+        # This allows overriding launch procedure, but only for those with installation-level permissions:
+        singleuser = os.path.join(script_dir, 'sudospawner-singleuser')
+        if not os.path.exists(singleuser):
+            # default: call jupyterhub-singleuser directly
+            singleuser = os.path.join(script_dir, 'jupyterhub-singleuser')
         spawn(singleuser, **kwargs)
     else:
         raise TypeError("action must be 'spawn' or 'kill'")
