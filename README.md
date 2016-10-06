@@ -43,17 +43,23 @@ You may want to initialize user environment variables before launching the serve
 If you install a script called `sudospawner-singleuser` next to `sudospawner`,
 this will be used instead of the direct `jupyterhub-singleuser` command.
 
-For example:
+For example, you might want to spawn notebook servers from conda environments that are revised and deployed separately from your hub instance. 
 
 ```bash
 #!/bin/bash -l
-export FOO=BAR
+set -e
 
-# this is how most sudospawner-singleuser scripts should end:
+# Activate the notebook environment
+source /opt/miniconda/bin/activate /opt/envs/notebook-latest
+
+# Show environment info in the log to aid debugging
+conda info
+
+# Delegate the notebook server launch to the jupyterhub-singleuser script.
+# this is how most sudospawner-singleuser scripts should end.
 exec "$(dirname "$0")/jupyterhub-singleuser" $@
 ```
 
 ## Example
 
-The [Dockerfile](https://github.com/jupyter/sudospawner/blob/master/Dockerfile) in this repo contains an example configuration for setting up a JupyterHub system,
-without any need to run anything as root.
+The [Dockerfile](https://github.com/jupyter/sudospawner/blob/master/Dockerfile) in this repo contains an example configuration for setting up a JupyterHub system, without any need to run anything as root.
