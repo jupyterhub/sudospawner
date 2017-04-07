@@ -56,19 +56,20 @@ class SudoSpawner(LocalProcessSpawner):
             cmd.append('--logging=debug')
         
         p = Subprocess(cmd, stdin=Subprocess.STREAM, stdout=Subprocess.STREAM, stderr=Subprocess.STREAM)
-        f = self.relog_stderr(p.stderr)
+        stderr_future = self.relog_stderr(p.stderr)
         # hand the stderr future to the IOLoop so it isn't orphaned,
-        # even though we aren't going to wait for it
-        IOLoop.current().add_callback(lambda : f)
+        # even though we aren't going to wait for it unless there's an error
+        IOLoop.current().add_callback(lambda : stderr_future)
         
         yield p.stdin.write(json.dumps(kwargs).encode('utf8'))
         p.stdin.close()
         data = yield p.stdout.read_until_close()
-        data_str = data.decode('utf8')
-        # Trim data outside the json block
-        data_str = data_str[data_str.index('{'):data_str.rindex('}')+1]
         if p.returncode:
-          raise RuntimeError("Spawner subprocess failed with exit code: %r" % p.returncode)
+            yield stderr_future
+            raise RuntimeError("sudospawner subprocess failed with exit code: %r" % p.returncode)
+        # Trim data outside the json block
+        data_str = data.decode('utf8')
+        data_str = data_str[data_str.index('{'):data_str.rindex('}')+1]
         return json.loads(data_str)
 
     @gen.coroutine
