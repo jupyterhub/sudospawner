@@ -67,10 +67,16 @@ class SudoSpawner(LocalProcessSpawner):
         if p.returncode:
             yield stderr_future
             raise RuntimeError("sudospawner subprocess failed with exit code: %r" % p.returncode)
-        # Trim data outside the json block
-        data_str = data.decode('utf8')
-        data_str = data_str[data_str.index('{'):data_str.rindex('}')+1]
-        return json.loads(data_str)
+
+        data_str = data.decode('utf8', 'replace')
+
+        try:
+            data_str = data_str[data_str.index('{'):data_str.rindex('}')+1]
+            response = json.loads(data_str)
+        except ValueError:
+            self.log.error("Failed to get JSON result from mediator: %r" % data_str)
+            raise
+        return response
 
     @gen.coroutine
     def start(self):
