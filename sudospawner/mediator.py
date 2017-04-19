@@ -59,8 +59,16 @@ def kill(pid, signal):
         # but log the error in case something really is wrong.
         app_log.error("Permission error sending signal %i to PID %i."
         " Assuming this means that our process is gone and another has claimed our PID.",
-        signal, pid
-        )
+        signal, pid)
+        alive = False
+    except OSError as e:
+        # Uncaught OSError. Something definitely went wrong,
+        # but the cause is likely that our process is gone and we are polling something funky.
+        # Treat it as if our process is gone,
+        # but log the error for diagnostic purposes.
+        app_log.exception("%s sending signal %i to PID %i."
+        " Assuming this means that our process is gone and another has claimed our PID.",
+        e, signal, pid)
         alive = False
     else:
         alive = True
