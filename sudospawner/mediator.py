@@ -21,7 +21,6 @@ to ensure correct launching of the single-user server.
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-import errno
 import getpass
 import json
 import pipes
@@ -50,12 +49,27 @@ def kill(pid, signal):
     app_log.debug("Sending signal %i to %i", signal, pid)
     try:
         os.kill(pid, signal)
+    except ProcessLookupError:
+        # not running
+        alive = False
+    except PermissionError:
+        # This *probably* means that another process claimed our PID
+        # and the JupyterHub database has unclean state.
+        # Treat it as if our process is gone,
+        # but log the error in case something really is wrong.
+        app_log.error("Permission error sending signal %i to PID %i."
+        " Assuming this means that our process is gone and another has claimed our PID.",
+        signal, pid)
+        alive = False
     except OSError as e:
-        if e.errno == errno.ESRCH:
-            # not running
-            alive = False
-        else:
-            raise
+        # Uncaught OSError. Something definitely went wrong,
+        # but the cause is likely that our process is gone and we are polling something funky.
+        # Treat it as if our process is gone,
+        # but log the error for diagnostic purposes.
+        app_log.exception("%s sending signal %i to PID %i."
+        " Assuming this means that our process is gone and another has claimed our PID.",
+        e, signal, pid)
+        alive = False
     else:
         alive = True
     finish({
