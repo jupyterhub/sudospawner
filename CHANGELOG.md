@@ -6,7 +6,7 @@
 
 - report better errors when sudospawner fails; change unhelpful `ValueError: substring not found`
   message when parsing output fails to a more helpful message and log the unparsed data
-- treat failures to signal the process as the process being missing, and long the failure, instead of raising errors
+- treat failures to signal the process as the process being missing, and log the failure, instead of raising errors
 
 
 ## 0.3
