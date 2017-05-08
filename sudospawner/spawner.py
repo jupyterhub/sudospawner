@@ -94,6 +94,19 @@ class SudoSpawner(LocalProcessSpawner):
 
     @gen.coroutine
     def _signal(self, sig):
+        if sig == 0:
+            # short-circuit existence check without invoking sudo
+            try:
+                os.kill(self.pid, sig)
+            except ProcessLookupError:
+                # No such process
+                return False
+            except PermissionError:
+                # When running hub with reduced permissions,
+                # we won't have permission to send signals, even 0.
+                # PermissionError means process exists.
+                pass
+            return True
         reply = yield self.do('kill', pid=self.pid, signal=sig)
         return reply['alive']
 
