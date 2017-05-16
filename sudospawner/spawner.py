@@ -9,6 +9,7 @@ This spawns a mediator process with sudo, which then takes actions on behalf of 
 
 import json
 import sys
+import os
 
 from tornado import gen
 from tornado.ioloop import IOLoop
