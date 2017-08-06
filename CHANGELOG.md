@@ -2,6 +2,12 @@
 
 ## 0.4
 
+### 0.4.1
+
+- Avoid invoking sudo for poll
+
+### 0.4.0
+
 0.4 adds better error handling:
 
 - report better errors when sudospawner fails; change unhelpful `ValueError: substring not found`
