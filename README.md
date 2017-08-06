@@ -1,5 +1,7 @@
 # SudoSpawner
 
+[![PyPI](https://img.shields.io/pypi/v/sudospawner.svg)](https://pypi.python.org/pypi/sudospawner)
+
 The SudoSpawner enables [JupyterHub](https://github.com/jupyter/jupyterhub)
 to spawn single-user servers without being root, by spawning an intermediate
 process via `sudo`, which takes actions on behalf of the user.
