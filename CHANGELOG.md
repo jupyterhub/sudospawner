@@ -1,5 +1,10 @@
 # Changes in sudospawner
 
+## 0.5
+
+- Remove deprecated code for supporting JupyterHub < 0.7.
+  JupyterHub ≥ 0.7 is required.
+
 ## 0.4
 
 ### 0.4.1
