@@ -28,8 +28,8 @@ JupyterHub administrator to have ``sudo`` access to execute.
         c.JupyterHub.spawner_class='sudospawner.SudoSpawner'
     
    The [JupyterHub documentation](http://jupyterhub.readthedocs.org/en/latest/index.html)
-   has additional information about [creating a configuration file](http://jupyterhub.readthedocs.org/en/latest/getting-started.html#how-to-configure-jupyterhub),
-   if needed, and [recommended file locations for configuration files](http://jupyterhub.readthedocs.org/en/latest/getting-started.html#file-locations).
+   has additional information about [creating a configuration file](https://jupyterhub.readthedocs.io/en/latest/getting-started/config-basics.html#generate-a-default-config-file),
+   if needed, and recommended file locations for configuration files.
 
 ## Custom singleuser launch command
 
