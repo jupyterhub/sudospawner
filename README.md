@@ -62,6 +62,20 @@ conda info
 exec "$(dirname "$0")/jupyterhub-singleuser" $@
 ```
 
+## SudoSpawner with JupyterLab-Hub singleuser launch command
+
+
+In order to have SudoSpawner work with JupyterLab-Hub you will need to create a custom singleuser launch command.
+Create the script `sudospawner-singleuser` containing the below code in the same directory as `sudospawner` and grant it the same permissions. 
+
+
+```bash
+#!/bin/bash -l
+
+# Delegate the notebook server launch to the jupyter-labhub script.
+exec "jupyter-labhub" $@
+```
+
 ## Example
 
 The [Dockerfile](https://github.com/jupyter/sudospawner/blob/master/Dockerfile) in this repo contains an example configuration for setting up a JupyterHub system, without any need to run anything as root.
