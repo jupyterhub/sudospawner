@@ -1,12 +1,18 @@
 # example showing sudo config
-# docker run -it -p 9000:8000 jupyter/jupyterhub-sudo
+# docker run -it -p 9000:8000 jupyterhub/jupyterhub-sudo
 
-FROM jupyter/jupyterhub
+FROM jupyterhub/jupyterhub:0.8.0
 
 MAINTAINER Jupyter Project <jupyter@googlegroups.com>
 
+RUN apt-get -y update \
+    && apt-get -y install sudo \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 # fix permissions on sudo executable (how did this get messed up?)
 RUN chmod 4755 /usr/bin/sudo
+
+RUN python3 -m pip install notebook
 
 # add the rhea user, who will run the server
 # she needs to be in the shadow group in order to access the PAM service
@@ -25,9 +31,10 @@ RUN chmod o-rwx /home/*
 
 ADD . /srv/sudospawn
 WORKDIR /srv/sudospawn
-RUN pip3 install .
+RUN python3 -m pip install .
 
 # make the working dir owned by rhea, so she can create the state database
 RUN chown rhea .
 
 USER rhea
+ADD examples/jupyterhub_config.py ./jupyterhub_config.py
