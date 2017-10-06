@@ -8,6 +8,7 @@ This spawns a mediator process with sudo, which then takes actions on behalf of 
 
 
 import json
+import shutil
 import sys
 import os
 
@@ -22,8 +23,8 @@ from jupyterhub.spawner import LocalProcessSpawner
 from jupyterhub.utils import random_port
 
 class SudoSpawner(LocalProcessSpawner):
-    
-    sudospawner_path = Unicode('sudospawner', config=True,
+
+    sudospawner_path = Unicode(shutil.which('sudospawner') or 'sudospawner', config=True,
         help="Path to sudospawner script"
     )
     sudo_args = List(['-nH'], config=True,
@@ -32,7 +33,7 @@ class SudoSpawner(LocalProcessSpawner):
     debug_mediator = Bool(False, config=True,
         help="Extra log output from the mediator process for debugging",
     )
-    
+
     @gen.coroutine
     def relog_stderr(self, stderr):
         while not stderr.closed():
@@ -86,6 +87,7 @@ class SudoSpawner(LocalProcessSpawner):
         # only args, not the base command
         reply = yield self.do(action='spawn', args=self.get_args(), env=self.get_env())
         self.pid = reply['pid']
+        print(self.ip)
         # 0.7 expects ip, port to be returned
         return (self.ip, self.port)
 
