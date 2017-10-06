@@ -46,7 +46,7 @@ class SudoSpawner(LocalProcessSpawner):
                 # If we do that, will get huge double-prefix messages:
                 # [I date JupyterHub] [W date SingleUser] msg...
                 sys.stderr.write(line.decode('utf8', 'replace'))
-    
+
     @gen.coroutine
     def do(self, action, **kwargs):
         """Instruct the mediator process to take a given action"""
@@ -56,13 +56,14 @@ class SudoSpawner(LocalProcessSpawner):
         cmd.append(self.sudospawner_path)
         if self.debug_mediator:
             cmd.append('--logging=debug')
-        
+
+        self.log.debug("Spawning %s", cmd)
         p = Subprocess(cmd, stdin=Subprocess.STREAM, stdout=Subprocess.STREAM, stderr=Subprocess.STREAM)
         stderr_future = self.relog_stderr(p.stderr)
         # hand the stderr future to the IOLoop so it isn't orphaned,
         # even though we aren't going to wait for it unless there's an error
         IOLoop.current().add_callback(lambda : stderr_future)
-        
+
         yield p.stdin.write(json.dumps(kwargs).encode('utf8'))
         p.stdin.close()
         data = yield p.stdout.read_until_close()
