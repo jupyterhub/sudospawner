@@ -90,7 +90,7 @@ class SudoSpawner(LocalProcessSpawner):
         self.pid = reply['pid']
         print(self.ip)
         # 0.7 expects ip, port to be returned
-        return (self.ip, self.port)
+        return (self.ip or '127.0.0.1', self.port)
 
     @gen.coroutine
     def _signal(self, sig):
