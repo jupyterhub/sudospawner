@@ -1,5 +1,9 @@
 # example showing sudo config
-# docker run -it -p 9000:8000 jupyterhub/jupyterhub-sudo
+# build from root with:
+#    docker build -t jupyterhub-sudo -f examples/Dockerfile .
+# run with:
+#    docker run -it -p 9000:8000 jupyterhub-sudo
+# visit http://127.0.0.1:9000 and login with username: io, password: io
 
 FROM jupyterhub/jupyterhub:0.8.0
 
