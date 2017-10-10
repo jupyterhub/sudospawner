@@ -8,6 +8,7 @@ This spawns a mediator process with sudo, which then takes actions on behalf of 
 
 
 import json
+import shutil
 import sys
 import os
 
@@ -22,8 +23,8 @@ from jupyterhub.spawner import LocalProcessSpawner
 from jupyterhub.utils import random_port
 
 class SudoSpawner(LocalProcessSpawner):
-    
-    sudospawner_path = Unicode('sudospawner', config=True,
+
+    sudospawner_path = Unicode(shutil.which('sudospawner') or 'sudospawner', config=True,
         help="Path to sudospawner script"
     )
     sudo_args = List(['-nH'], config=True,
@@ -32,7 +33,7 @@ class SudoSpawner(LocalProcessSpawner):
     debug_mediator = Bool(False, config=True,
         help="Extra log output from the mediator process for debugging",
     )
-    
+
     @gen.coroutine
     def relog_stderr(self, stderr):
         while not stderr.closed():
@@ -45,7 +46,7 @@ class SudoSpawner(LocalProcessSpawner):
                 # If we do that, will get huge double-prefix messages:
                 # [I date JupyterHub] [W date SingleUser] msg...
                 sys.stderr.write(line.decode('utf8', 'replace'))
-    
+
     @gen.coroutine
     def do(self, action, **kwargs):
         """Instruct the mediator process to take a given action"""
@@ -55,13 +56,14 @@ class SudoSpawner(LocalProcessSpawner):
         cmd.append(self.sudospawner_path)
         if self.debug_mediator:
             cmd.append('--logging=debug')
-        
+
+        self.log.debug("Spawning %s", cmd)
         p = Subprocess(cmd, stdin=Subprocess.STREAM, stdout=Subprocess.STREAM, stderr=Subprocess.STREAM)
         stderr_future = self.relog_stderr(p.stderr)
         # hand the stderr future to the IOLoop so it isn't orphaned,
         # even though we aren't going to wait for it unless there's an error
         IOLoop.current().add_callback(lambda : stderr_future)
-        
+
         yield p.stdin.write(json.dumps(kwargs).encode('utf8'))
         p.stdin.close()
         data = yield p.stdout.read_until_close()
@@ -86,8 +88,9 @@ class SudoSpawner(LocalProcessSpawner):
         # only args, not the base command
         reply = yield self.do(action='spawn', args=self.get_args(), env=self.get_env())
         self.pid = reply['pid']
+        print(self.ip)
         # 0.7 expects ip, port to be returned
-        return (self.ip, self.port)
+        return (self.ip or '127.0.0.1', self.port)
 
     @gen.coroutine
     def _signal(self, sig):

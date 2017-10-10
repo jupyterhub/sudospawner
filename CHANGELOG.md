@@ -2,6 +2,11 @@
 
 ## 0.5
 
+### 0.5.1
+
+- Fix bug preventing JupyterHub 0.8 from connecting to Spawners with default `ip`.
+
+### 0.5.0
 - Remove deprecated code for supporting JupyterHub < 0.7.
   JupyterHub ≥ 0.7 is required.
 
