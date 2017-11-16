@@ -47,6 +47,9 @@ class SudoSpawner(LocalProcessSpawner):
                 # [I date JupyterHub] [W date SingleUser] msg...
                 sys.stderr.write(line.decode('utf8', 'replace'))
 
+    def make_preexec_fn(self):
+        return None
+
     @gen.coroutine
     def do(self, action, **kwargs):
         """Instruct the mediator process to take a given action"""
@@ -58,7 +61,7 @@ class SudoSpawner(LocalProcessSpawner):
             cmd.append('--logging=debug')
 
         self.log.debug("Spawning %s", cmd)
-        p = Subprocess(cmd, stdin=Subprocess.STREAM, stdout=Subprocess.STREAM, stderr=Subprocess.STREAM)
+        p = Subprocess(cmd, stdin=Subprocess.STREAM, stdout=Subprocess.STREAM, stderr=Subprocess.STREAM, preexec_fn=self.make_preexec_fn())
         stderr_future = self.relog_stderr(p.stderr)
         # hand the stderr future to the IOLoop so it isn't orphaned,
         # even though we aren't going to wait for it unless there's an error
@@ -109,4 +112,3 @@ class SudoSpawner(LocalProcessSpawner):
             return True
         reply = yield self.do('kill', pid=self.pid, signal=sig)
         return reply['alive']
-
