@@ -2,6 +2,11 @@
 
 ## 0.5
 
+### 0.5.2
+
+- Add `make_preexec_fn` method as an avenue for overriding pre-exec actions,
+  e.g. setting resource limits. Default behavior is unchanged.
+
 ### 0.5.1
 
 - Fix bug preventing JupyterHub 0.8 from connecting to Spawners with default `ip`.
