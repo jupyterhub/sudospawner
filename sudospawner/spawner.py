@@ -54,6 +54,7 @@ class SudoSpawner(LocalProcessSpawner):
     def do(self, action, **kwargs):
         """Instruct the mediator process to take a given action"""
         kwargs['action'] = action
+        env = kwargs.get('env')
         cmd = ['sudo', '-u', self.user.name]
         cmd.extend(self.sudo_args)
         cmd.append(self.sudospawner_path)
@@ -61,7 +62,7 @@ class SudoSpawner(LocalProcessSpawner):
             cmd.append('--logging=debug')
 
         self.log.debug("Spawning %s", cmd)
-        p = Subprocess(cmd, stdin=Subprocess.STREAM, stdout=Subprocess.STREAM, stderr=Subprocess.STREAM, preexec_fn=self.make_preexec_fn())
+        p = Subprocess(cmd, stdin=Subprocess.STREAM, stdout=Subprocess.STREAM, stderr=Subprocess.STREAM, preexec_fn=self.make_preexec_fn(), env=env)
         stderr_future = self.relog_stderr(p.stderr)
         # hand the stderr future to the IOLoop so it isn't orphaned,
         # even though we aren't going to wait for it unless there's an error
