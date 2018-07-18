@@ -56,3 +56,5 @@ target/
 
 jupyterhub.sqlite
 jupyterhub_cookie_secret
+
+.pytest_cache

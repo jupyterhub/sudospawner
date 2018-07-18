@@ -54,8 +54,12 @@ class SudoSpawner(LocalProcessSpawner):
     def do(self, action, **kwargs):
         """Instruct the mediator process to take a given action"""
         kwargs['action'] = action
-        cmd = ['sudo', '-u', self.user.name]
-        cmd.extend(self.sudo_args)
+        if kwargs.pop('_skip_sudo', False):
+            # mock testing by skipping the sudo part
+            cmd = []
+        else:
+            cmd = ['sudo', '-u', self.user.name]
+            cmd.extend(self.sudo_args)
         cmd.append(self.sudospawner_path)
         if self.debug_mediator:
             cmd.append('--logging=debug')
