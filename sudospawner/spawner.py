@@ -11,6 +11,7 @@ import json
 import shutil
 import sys
 import os
+import warnings
 
 from tornado import gen
 from tornado.ioloop import IOLoop
@@ -30,6 +31,10 @@ class SudoSpawner(LocalProcessSpawner):
     sudo_args = List(['-nH'], config=True,
         help="Extra args to pass to sudo"
     )
+    mediator_log_level = Unicode("INFO", config=True,
+        help="Log level for the mediator process",
+    )
+    # TODO: deprecated in > 0.5.2
     debug_mediator = Bool(False, config=True,
         help="Extra log output from the mediator process for debugging",
     )
@@ -58,7 +63,10 @@ class SudoSpawner(LocalProcessSpawner):
         cmd.extend(self.sudo_args)
         cmd.append(self.sudospawner_path)
         if self.debug_mediator:
-            cmd.append('--logging=debug')
+            self.mediator_log_level = 'DEBUG'
+            warnings.warn("debug_mediator is deprecated in favor of mediator_log_level", DeprecationWarning)
+        if self.mediator_log_level:
+            cmd.append('--logging={}'.format(self.mediator_log_level))
 
         self.log.debug("Spawning %s", cmd)
         p = Subprocess(cmd, stdin=Subprocess.STREAM, stdout=Subprocess.STREAM, stderr=Subprocess.STREAM, preexec_fn=self.make_preexec_fn())
