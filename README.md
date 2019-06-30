@@ -78,4 +78,4 @@ exec "jupyter-labhub" $@
 
 ## Example
 
-The [Dockerfile](https://github.com/jupyter/sudospawner/blob/master/Dockerfile) in this repo contains an example configuration for setting up a JupyterHub system, without any need to run anything as root.
+The [Dockerfile](https://github.com/jupyter/sudospawner/blob/master/examples/Dockerfile) in this repo contains an example configuration for setting up a JupyterHub system, without any need to run anything as root.
