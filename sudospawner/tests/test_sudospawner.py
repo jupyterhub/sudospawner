@@ -111,7 +111,7 @@ def test_poll(user):
     assert isinstance(status, int)
 
 
-@pytest.mark.gen_test
+@pytest.mark.gen_test(timeout=10)
 def test_env(user):
     spawner = MockSudoSpawner(user=user)
     spawner.environment["TEST_KEY"] = "TEST_VALUE"
