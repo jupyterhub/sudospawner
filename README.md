@@ -33,8 +33,12 @@ JupyterHub administrator to have ``sudo`` access to execute.
    has additional information about [creating a configuration file](https://jupyterhub.readthedocs.io/en/latest/getting-started/config-basics.html#generate-a-default-config-file),
    if needed, and recommended file locations for configuration files.
 
-## Custom singleuser launch command
+If you would like to use JupyterLab, then all you have to do is set the `default_url`
+in `jupyterhub_config.py`:
 
+    c.Spawner.default_url = '/lab'
+
+## Custom singleuser launch command
 
 In order to limit what permissions the use of sudospawner grants the Hub,
 when a single-user server is launched
@@ -62,20 +66,6 @@ conda info
 # Delegate the notebook server launch to the jupyterhub-singleuser script.
 # this is how most sudospawner-singleuser scripts should end.
 exec "$(dirname "$0")/jupyterhub-singleuser" $@
-```
-
-## SudoSpawner with JupyterLab-Hub singleuser launch command
-
-
-In order to have SudoSpawner work with JupyterLab-Hub you will need to create a custom singleuser launch command.
-Create the script `sudospawner-singleuser` containing the below code in the same directory as `sudospawner` and grant it the same permissions. 
-
-
-```bash
-#!/bin/bash -l
-
-# Delegate the notebook server launch to the jupyter-labhub script.
-exec "jupyter-labhub" $@
 ```
 
 ## Example
