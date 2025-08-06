@@ -11,8 +11,8 @@ import os
 import sys
 
 v = sys.version_info
-if v[:2] < (3, 3):
-    error = "ERROR: Jupyter Hub requires Python version 3.3 or above."
+if v[:2] < (3, 9):
+    error = "ERROR: Jupyter Hub requires Python version 3.9 or above."
     print(error, file=sys.stderr)
     sys.exit(1)
 
