@@ -103,7 +103,6 @@ class SudoSpawner(LocalProcessSpawner):
         # only args, not the base command
         reply = yield self.do(action='spawn', args=self.get_args(), env=self.get_env())
         self.pid = reply['pid']
-        print(self.ip)
         # 0.7 expects ip, port to be returned
         return (self.ip or '127.0.0.1', self.port)
 
