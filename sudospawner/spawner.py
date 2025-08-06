@@ -70,7 +70,7 @@ class SudoSpawner(LocalProcessSpawner):
             self.mediator_log_level = 'DEBUG'
             warnings.warn("debug_mediator is deprecated in favor of mediator_log_level", DeprecationWarning)
         if self.mediator_log_level:
-            cmd.append('--logging={}'.format(self.mediator_log_level))
+            cmd.append(f'--logging={self.mediator_log_level}')
 
         self.log.debug("Spawning %s", cmd)
         p = Subprocess(cmd, stdin=Subprocess.STREAM, stdout=Subprocess.STREAM, stderr=Subprocess.STREAM, preexec_fn=self.make_preexec_fn())

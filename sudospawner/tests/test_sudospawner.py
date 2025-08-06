@@ -83,7 +83,7 @@ def test_spawn(user):
     pid = spawner.pid
     status = yield spawner.poll()
     assert status is None
-    url = "http://{}:{}".format(ip, port)
+    url = f"http://{ip}:{port}"
     r = requests.get(url)
     r.raise_for_status()
     yield spawner.stop()
@@ -119,7 +119,7 @@ def test_env(user):
     status = yield spawner.poll()
     time.sleep(1)
     assert status is None
-    url = "http://{}:{}/env".format(ip, port)
+    url = f"http://{ip}:{port}/env"
     r = requests.get(url)
     yield spawner.stop()
     r.raise_for_status()
