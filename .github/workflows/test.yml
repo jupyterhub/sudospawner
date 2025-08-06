@@ -34,5 +34,8 @@ jobs:
       - name: Run pytest
         run: |
           pytest -v --color=yes --cov=sudospawner sudospawner/tests
+      - name: Setup tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
       - name: Submit codecov report
         uses: codecov/codecov-action@v4
