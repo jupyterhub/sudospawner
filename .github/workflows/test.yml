@@ -33,9 +33,11 @@ jobs:
           python -m pip install --pre -r test-requirements.txt -e .
       - name: Run pytest
         run: |
-          pytest -v --color=yes --cov=sudospawner sudospawner/tests
-      - name: Setup tmate session
-        if: ${{ failure() }}
-        uses: mxschmitt/action-tmate@v3
+          if [[ "${{ matrix.python }}" == "3.12" ]]; then
+            # TODO: there is some issue with Python 3.12 and coverage that causes a test suite failure
+            pytest -v --color=yes sudospawner/tests
+          else
+            pytest -v --color=yes --cov=sudospawner sudospawner/tests
+          fi
       - name: Submit codecov report
         uses: codecov/codecov-action@v4
