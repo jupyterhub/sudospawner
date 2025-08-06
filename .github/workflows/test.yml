@@ -1,6 +1,3 @@
-# This is a GitHub workflow defining a set of jobs with a set of steps.
-# ref: https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-syntax-for-github-actions
-#
 name: Test
 
 # Trigger the workflow's on all PRs but only on pushed tags or commits to
@@ -13,30 +10,29 @@ on:
 
 jobs:
   pytest:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 10
 
     strategy:
       # Keep running even if one variation of the job fail
       fail-fast: false
       matrix:
-        python: ['3.5', '3.6', '3.7', '3.8', '3.9']
+        python: ["3.9", "3.10", "3.11", "3.12", "3.13"]
 
     steps:
-      - uses: actions/checkout@v2
-      # NOTE: actions/setup-python@v2 make use of a cache within the GitHub base
+      - uses: actions/checkout@v4
+      # NOTE: actions/setup-python@v5 make use of a cache within the GitHub base
       #       environment and setup in a fraction of a second.
       - name: Install Python ${{ matrix.python }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
       - name: Install Python dependencies
         run: |
-          pip install --upgrade pip
-          pip install --pre -r test-requirements.txt -e .
+          python -m pip install --upgrade pip
+          python -m pip install --pre -r test-requirements.txt -e .
       - name: Run pytest
         run: |
           pytest -v --color=yes --cov=sudospawner sudospawner/tests
       - name: Submit codecov report
-        run: |
-          codecov
+        uses: codecov/codecov-action@v4
