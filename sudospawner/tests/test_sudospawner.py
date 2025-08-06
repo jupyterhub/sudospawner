@@ -14,12 +14,10 @@ from sudospawner import SudoSpawner
 @pytest.fixture(scope="module")
 def io_loop(request):
     """Same as pytest-tornado.io_loop, but re-scoped to module-level"""
-    io_loop = ioloop.IOLoop()
-    io_loop.make_current()
+    io_loop = ioloop.IOLoop.current()
 
     def _close():
-        io_loop.clear_current()
-        io_loop.close(all_fds=True)
+        io_loop.close()
 
     request.addfinalizer(_close)
     return io_loop
@@ -33,10 +31,11 @@ def user():
     return user
 
 
-_mock_server_sh = """
+_mock_server_sh = f"""
 #!/bin/sh
-exec "{}" -m sudospawner.tests.mockserver "$@"
-""".format(sys.executable).lstrip()
+echo "Running mock server:"
+exec "{sys.executable}" -m sudospawner.tests.mockserver "$@"
+""".lstrip()
 
 
 @pytest.fixture(autouse=True)
