@@ -36,9 +36,7 @@ def user():
 _mock_server_sh = """
 #!/bin/sh
 exec "{}" -m sudospawner.tests.mockserver "$@"
-""".format(
-    sys.executable
-).lstrip()
+""".format(sys.executable).lstrip()
 
 
 @pytest.fixture(autouse=True)
@@ -72,8 +70,19 @@ class MockSudoSpawner(SudoSpawner):
         return env
 
     def do(self, *args, **kwargs):
-        kwargs['_skip_sudo'] = True
+        kwargs["_skip_sudo"] = True
         return super().do(*args, **kwargs)
+
+    def get_args(self):
+        # Per super().get_args():
+        # .. versionchanged:: 2.0
+        #     Prior to 2.0, JupyterHub passed some options such as ip, port,
+        #     and default_url to the command-line. JupyterHub 2.0 no longer builds
+        #     any CLI args other than `Spawner.cmd` and `Spawner.args`. All values
+        #     that come from jupyterhub itself will be passed via environment
+        #     variables.
+        # mock sudospawner needs --port and will fail without it.
+        return [f"--port={self.port}"]
 
 
 @pytest.mark.gen_test

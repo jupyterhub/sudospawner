@@ -12,6 +12,7 @@ Handlers and their purpose include:
 Copied from JupyterHub test suite.
 
 """
+
 import argparse
 import json
 import os
@@ -46,8 +47,8 @@ def main(args):
     )
 
     server = httpserver.HTTPServer(app)
-    server.listen(args.port, '127.0.0.1')
-    log.app_log.info("Starting mock server on 127.0.0.1:%i" % args.port)
+    server.listen(args.port, "127.0.0.1")
+    log.app_log.info(f"Starting mock server on 127.0.0.1:{args.port}")
     loop = ioloop.IOLoop.current()
     # stop after 60 seconds
     # so we don't leave orphaned processes lying about
@@ -61,6 +62,6 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--port", type=int)
+    parser.add_argument("--port", type=int, required=True)
     args, extra = parser.parse_known_args()
     main(args)
