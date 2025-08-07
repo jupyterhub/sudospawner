@@ -40,4 +40,4 @@ jobs:
               pytest --cov=sudospawner
           fi
 
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v5
