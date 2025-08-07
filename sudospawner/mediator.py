@@ -23,7 +23,7 @@ to ensure correct launching of the single-user server.
 
 import getpass
 import json
-import pipes
+import shlex
 import os
 import sys
 
@@ -85,7 +85,7 @@ def spawn(singleuser, args, env):
     and prohibit PYTHONPATH from env for basic protections.
     """
     cmd = [singleuser] + args
-    cmd_s = ' '.join(pipes.quote(s) for s in cmd)
+    cmd_s = ' '.join(shlex.quote(s) for s in cmd)
     app_log.info("Spawning %s", cmd_s)
     if 'PYTHONPATH' in env:
         app_log.warn("PYTHONPATH env not allowed for security reasons")
