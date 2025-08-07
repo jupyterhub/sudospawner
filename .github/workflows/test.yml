@@ -10,7 +10,7 @@ on:
 
 jobs:
   pytest:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
 
     strategy:
@@ -33,10 +33,11 @@ jobs:
       - name: Run pytest
         run: |
           if [[ "${{ matrix.python }}" == "3.12" ]]; then
-            # TODO: there is some issue with Python 3.12 and coverage that causes a test suite failure
-            pytest
+              # TODO: there is some issue with Python 3.12 and coverage that
+              #       causes a test suite failure
+              pytest
           else
-            pytest --cov=sudospawner
+              pytest --cov=sudospawner
           fi
 
       - uses: codecov/codecov-action@v4
