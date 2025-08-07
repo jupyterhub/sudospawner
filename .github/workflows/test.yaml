@@ -17,7 +17,15 @@ jobs:
       # Keep running even if one variation of the job fail
       fail-fast: false
       matrix:
-        python: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.x"]
+        include:
+          - python-version: "3.9"
+            pip-install-spec: "jupyterhub==4.*"
+          - python-version: "3.11"
+            pip-install-spec: "jupyterhub==5.*"
+          - python-version: "3.13"
+            pip-install-spec: "jupyterhub"
+          - python-version: "3.x"
+            pip-install-spec: "--pre jupyterhub"
 
     steps:
       - uses: actions/checkout@v4
@@ -27,8 +35,9 @@ jobs:
 
       - name: Install Python dependencies
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install --pre -e ".[test]"
+          pip install --upgrade pip
+          pip install ${{ matrix.pip-install-spec }}
+          pip install -e ".[test]"
 
       - name: Run pytest
         run: |
