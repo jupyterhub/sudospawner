@@ -14,12 +14,10 @@ from sudospawner import SudoSpawner
 @pytest.fixture(scope="module")
 def io_loop(request):
     """Same as pytest-tornado.io_loop, but re-scoped to module-level"""
-    io_loop = ioloop.IOLoop()
-    io_loop.make_current()
+    io_loop = ioloop.IOLoop.current()
 
     def _close():
-        io_loop.clear_current()
-        io_loop.close(all_fds=True)
+        io_loop.close()
 
     request.addfinalizer(_close)
     return io_loop
@@ -33,12 +31,11 @@ def user():
     return user
 
 
-_mock_server_sh = """
+_mock_server_sh = f"""
 #!/bin/sh
-exec "{}" -m sudospawner.tests.mockserver "$@"
-""".format(
-    sys.executable
-).lstrip()
+echo "Running mock server:"
+exec "{sys.executable}" -m sudospawner.tests.mockserver "$@"
+""".lstrip()
 
 
 @pytest.fixture(autouse=True)
@@ -72,8 +69,19 @@ class MockSudoSpawner(SudoSpawner):
         return env
 
     def do(self, *args, **kwargs):
-        kwargs['_skip_sudo'] = True
+        kwargs["_skip_sudo"] = True
         return super().do(*args, **kwargs)
+
+    def get_args(self):
+        # Per super().get_args():
+        # .. versionchanged:: 2.0
+        #     Prior to 2.0, JupyterHub passed some options such as ip, port,
+        #     and default_url to the command-line. JupyterHub 2.0 no longer builds
+        #     any CLI args other than `Spawner.cmd` and `Spawner.args`. All values
+        #     that come from jupyterhub itself will be passed via environment
+        #     variables.
+        # mock sudospawner needs --port and will fail without it.
+        return [f"--port={self.port}"]
 
 
 @pytest.mark.gen_test
@@ -83,7 +91,7 @@ def test_spawn(user):
     pid = spawner.pid
     status = yield spawner.poll()
     assert status is None
-    url = "http://{}:{}".format(ip, port)
+    url = f"http://{ip}:{port}"
     r = requests.get(url)
     r.raise_for_status()
     yield spawner.stop()
@@ -119,7 +127,7 @@ def test_env(user):
     status = yield spawner.poll()
     time.sleep(1)
     assert status is None
-    url = "http://{}:{}/env".format(ip, port)
+    url = f"http://{ip}:{port}/env"
     r = requests.get(url)
     yield spawner.stop()
     r.raise_for_status()
