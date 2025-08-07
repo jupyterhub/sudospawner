@@ -1,25 +1,42 @@
-# Always build and verify our release process, but then also conditionally
-# upload to PyPI if a git tag triggered the workflow.
 name: Release
 
+# Always tests wheel building, but only publish to PyPI on pushed tags.
 on:
-  push:
   pull_request:
+    paths-ignore:
+      - ".github/workflows/*.yaml"
+      - "!.github/workflows/release.yaml"
+  push:
+    paths-ignore:
+      - ".github/workflows/*.yaml"
+      - "!.github/workflows/release.yaml"
+    branches-ignore:
+      - "dependabot/**"
+      - "pre-commit-ci-update-config"
+    tags: ["**"]
   workflow_dispatch:
 
 jobs:
-  build-verify-upload-release:
+  build-release:
     runs-on: ubuntu-24.04
+    permissions:
+      # id-token=write is required for pypa/gh-action-pypi-publish, and the PyPI
+      # project needs to be configured to trust this workflow.
+      #
+      # ref: https://github.com/jupyterhub/team-compass/issues/648
+      #
+      id-token: write
+
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
 
-      - name: install dependencies
+      - name: install build package
         run: |
           pip install --upgrade pip
-          pip install build twine
+          pip install build
           pip freeze
 
       - name: build release
@@ -27,12 +44,6 @@ jobs:
           python -m build --sdist --wheel .
           ls -l dist
 
-      - name: verify release metadata
-        run: python -m twine check dist/*
-
-      - name: upload release to pypi
+      - name: publish to pypi
+        uses: pypa/gh-action-pypi-publish@release/v1
         if: startsWith(github.ref, 'refs/tags/')
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.pypi_password }}
-        run: twine upload dist/*
