@@ -2,7 +2,7 @@
 
 [![Latest PyPI version](https://img.shields.io/pypi/v/sudospawner?logo=pypi)](https://pypi.python.org/pypi/sudospawner)
 [![Latest conda-forge version](https://img.shields.io/conda/vn/conda-forge/sudospawner?logo=conda-forge)](https://anaconda.org/conda-forge/sudospawner)
-[![GitHub Workflow Status - Test](https://img.shields.io/github/actions/workflow/status/jupyterhub/sudospawner/test.yml?logo=github&label=tests)](https://github.com/jupyterhub/sudospawner/actions)
+[![GitHub Workflow Status - Test](https://img.shields.io/github/actions/workflow/status/jupyterhub/sudospawner/test.yaml?logo=github&label=tests)](https://github.com/jupyterhub/sudospawner/actions)
 [![Test coverage of code](https://codecov.io/gh/jupyterhub/sudospawner/branch/main/graph/badge.svg)](https://codecov.io/gh/jupyterhub/sudospawner)
 [![Issue tracking - GitHub](https://img.shields.io/badge/issue_tracking-github-blue?logo=github)](https://github.com/jupyterhub/sudospawner/issues)
 [![Help forum - Discourse](https://img.shields.io/badge/help_forum-discourse-blue?logo=discourse)](https://discourse.jupyter.org/c/jupyterhub)

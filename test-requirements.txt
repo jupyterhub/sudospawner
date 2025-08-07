@@ -1,5 +1,0 @@
-pytest
-pytest-tornado
-pytest-cov
-requests
-codecov

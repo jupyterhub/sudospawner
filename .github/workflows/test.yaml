@@ -10,34 +10,34 @@ on:
 
 jobs:
   pytest:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
 
     strategy:
       # Keep running even if one variation of the job fail
       fail-fast: false
       matrix:
-        python: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.x"]
 
     steps:
       - uses: actions/checkout@v4
-      # NOTE: actions/setup-python@v5 make use of a cache within the GitHub base
-      #       environment and setup in a fraction of a second.
-      - name: Install Python ${{ matrix.python }}
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
+
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install --pre -r test-requirements.txt -e .
+          python -m pip install --pre -e ".[test]"
+
       - name: Run pytest
         run: |
           if [[ "${{ matrix.python }}" == "3.12" ]]; then
-            # TODO: there is some issue with Python 3.12 and coverage that causes a test suite failure
-            pytest -v --color=yes sudospawner/tests
+              # TODO: there is some issue with Python 3.12 and coverage that
+              #       causes a test suite failure
+              pytest
           else
-            pytest -v --color=yes --cov=sudospawner sudospawner/tests
+              pytest --cov=sudospawner
           fi
-      - name: Submit codecov report
-        uses: codecov/codecov-action@v4
+
+      - uses: codecov/codecov-action@v5

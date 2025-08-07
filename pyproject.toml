@@ -1,0 +1,98 @@
+# build-system
+# - ref: https://peps.python.org/pep-0517/
+#
+[build-system]
+requires = ["setuptools>=64", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+
+# project
+# - ref 1: https://peps.python.org/pep-0621/
+# - ref 2: https://hatch.pypa.io/latest/config/metadata/#project-metadata
+#
+[project]
+name = "sudospawner"
+version = "0.6.0.dev"
+description = "SudoSpawner: Spawner for JupyterHub using sudo"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {file = "LICENSE"}
+keywords = ["JupyterHub", "Spawner", "Interactive", "Interpreter", "Shell", "Web"]
+authors = [
+    {name = "Jupyter Development Team", email = "jupyter@googlegroups.com"},
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "Intended Audience :: Science/Research",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS :: MacOS X",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    # NOTE: If lower bounds are updated, also update our test for the lower
+    #       bounds in .github/workflows/test.yaml.
+    "jupyterhub>=0.7",
+    "notebook",
+]
+
+[project.scripts]
+sudospawner = "sudospawner.mediator:main"
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-cov",
+    "pytest-tornado",
+    "requests",
+]
+
+[project.urls]
+Documentation = "https://github.com/jupyterhub/sudospawner#readme"
+Source = "https://github.com/jupyterhub/sudospawner"
+Issues = "https://github.com/jupyterhub/sudospawner/issues"
+
+
+# pytest is used for running Python based tests
+#
+# ref: https://docs.pytest.org/en/stable/
+#
+[tool.pytest.ini_options]
+addopts = "--verbose --color=yes --durations=10"
+testpaths = ["sudospawner/tests"]
+
+
+# tbump is used to simplify and standardize the release process when updating
+# the version, making a git commit and tag, and pushing changes.
+#
+# ref: https://github.com/your-tools/tbump#readme
+#
+[tool.tbump]
+github_url = "https://github.com/jupyterhub/sudospawner"
+
+[tool.tbump.version]
+current = "0.6.0.dev"
+regex = '''
+    (?P<major>\d+)
+    \.
+    (?P<minor>\d+)
+    \.
+    (?P<patch>\d+)
+    (?P<pre>((a|b|rc)\d+)|)
+    \.?
+    (?P<dev>(?<=\.)dev\d*|)
+'''
+
+[tool.tbump.git]
+message_template = "Bump to {new_version}"
+tag_template = "{new_version}"
+
+[[tool.tbump.file]]
+src = "pyproject.toml"
+search = "version ="
+
+[[tool.tbump.file]]
+src = "sudospawner/version.py"
