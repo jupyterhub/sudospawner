@@ -35,8 +35,7 @@ classifiers = [
 dependencies = [
     # NOTE: If lower bounds are updated, also update our test for the lower
     #       bounds in .github/workflows/test.yaml.
-    "jupyterhub>=0.7",
-    "notebook",
+    "jupyterhub>=4",
 ]
 
 [project.scripts]
