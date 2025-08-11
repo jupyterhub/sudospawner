@@ -1,10 +1,16 @@
-# whitelist of users that can spawn single-user servers
-Runas_Alias JUPYTER_USERS = io, europa, ganymede, callisto, rhea
+# An example sudoers file added to /etc/sudoers.d/sudospawner
+#
+# sudoers file reference
+# https://www.sudo.ws/docs/man/sudoers.man/
+#
 
-# the command(s) jupyterhub can run on behalf of the above users without needing a password
-# this command handles the signalling of spawning servers
-Cmnd_Alias SPAWNER_CMD = /opt/conda/bin/sudospawner
+# Aliases
+User_Alias JH_PROCESS_OWNING_USER = rhea
+Runas_Alias JH_SPAWNABLE_USERS = ALL # = rhea, io, europa
+Cmnd_Alias JH_SUDOSPAWNER_COMMAND = /usr/local/bin/sudospawner
 
-# actually give hub user permission to run the above command on behalf
-# of the above users without a password
-rhea ALL=(JUPYTER_USERS) NOPASSWD:SPAWNER_CMD
+# Allow the UNIX user owning the jupyterhub process to execute a specific
+# command as another user by using sudo without a password. The command enables
+# sudospawner to spawn and stop single-user server processes owned by other UNIX
+# users.
+JH_PROCESS_OWNING_USER ALL=(JH_SPAWNABLE_USERS) NOPASSWD:JH_SUDOSPAWNER_COMMAND
