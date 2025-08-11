@@ -13,7 +13,6 @@ import sys
 import os
 import warnings
 
-from tornado import gen
 from tornado.ioloop import IOLoop
 from tornado.iostream import StreamClosedError
 from tornado.process import Subprocess
@@ -39,11 +38,10 @@ class SudoSpawner(LocalProcessSpawner):
         help="Extra log output from the mediator process for debugging",
     )
 
-    @gen.coroutine
-    def relog_stderr(self, stderr):
+    async def relog_stderr(self, stderr):
         while not stderr.closed():
             try:
-                line = yield stderr.read_until(b'\n')
+                line = await stderr.read_until(b'\n')
             except StreamClosedError:
                 return
             else:
@@ -55,8 +53,7 @@ class SudoSpawner(LocalProcessSpawner):
     def make_preexec_fn(self):
         return None
 
-    @gen.coroutine
-    def do(self, action, **kwargs):
+    async def do(self, action, **kwargs):
         """Instruct the mediator process to take a given action"""
         kwargs['action'] = action
         if kwargs.pop('_skip_sudo', False):
@@ -79,11 +76,11 @@ class SudoSpawner(LocalProcessSpawner):
         # even though we aren't going to wait for it unless there's an error
         IOLoop.current().add_callback(lambda : stderr_future)
 
-        yield p.stdin.write(json.dumps(kwargs).encode('utf8'))
+        await p.stdin.write(json.dumps(kwargs).encode('utf8'))
         p.stdin.close()
-        data = yield p.stdout.read_until_close()
+        data = await p.stdout.read_until_close()
         if p.returncode:
-            yield stderr_future
+            await stderr_future
             raise RuntimeError("sudospawner subprocess failed with exit code: %r" % p.returncode)
 
         data_str = data.decode('utf8', 'replace')
@@ -96,18 +93,15 @@ class SudoSpawner(LocalProcessSpawner):
             raise
         return response
 
-    @gen.coroutine
-    def start(self):
+    async def start(self):
         self.port = random_port()
 
         # only args, not the base command
-        reply = yield self.do(action='spawn', args=self.get_args(), env=self.get_env())
+        reply = await self.do(action='spawn', args=self.get_args(), env=self.get_env())
         self.pid = reply['pid']
-        # 0.7 expects ip, port to be returned
         return (self.ip or '127.0.0.1', self.port)
 
-    @gen.coroutine
-    def _signal(self, sig):
+    async def _signal(self, sig):
         if sig == 0:
             # short-circuit existence check without invoking sudo
             try:
@@ -121,5 +115,5 @@ class SudoSpawner(LocalProcessSpawner):
                 # PermissionError means process exists.
                 pass
             return True
-        reply = yield self.do('kill', pid=self.pid, signal=sig)
+        reply = await self.do('kill', pid=self.pid, signal=sig)
         return reply['alive']
