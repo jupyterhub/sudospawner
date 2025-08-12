@@ -33,10 +33,6 @@ class SudoSpawner(LocalProcessSpawner):
     mediator_log_level = Unicode("INFO", config=True,
         help="Log level for the mediator process",
     )
-    # TODO: deprecated in > 0.5.2
-    debug_mediator = Bool(False, config=True,
-        help="Extra log output from the mediator process for debugging",
-    )
 
     async def relog_stderr(self, stderr):
         while not stderr.closed():
@@ -63,9 +59,6 @@ class SudoSpawner(LocalProcessSpawner):
             cmd = ['sudo', '-u', self.user.name]
             cmd.extend(self.sudo_args)
         cmd.append(self.sudospawner_path)
-        if self.debug_mediator:
-            self.mediator_log_level = 'DEBUG'
-            warnings.warn("debug_mediator is deprecated in favor of mediator_log_level", DeprecationWarning)
         if self.mediator_log_level:
             cmd.append(f'--logging={self.mediator_log_level}')
 
