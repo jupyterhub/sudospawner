@@ -41,6 +41,9 @@ dependencies = [
 [project.scripts]
 sudospawner = "sudospawner.mediator:main"
 
+[project.entry-points."jupyterhub.spawners"]
+sudo = "sudospawner:SudoSpawner"
+
 [project.optional-dependencies]
 test = [
     "pytest",
