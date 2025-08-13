@@ -23,14 +23,14 @@ to ensure correct launching of the single-user server.
 
 import getpass
 import json
-import shlex
 import os
+import shlex
 import sys
-
 from subprocess import Popen, TimeoutExpired
 
 from tornado import log
 from tornado.options import parse_command_line
+
 app_log = log.app_log
 
 
@@ -57,29 +57,34 @@ def kill(pid, signal):
         # and the JupyterHub database has unclean state.
         # Treat it as if our process is gone,
         # but log the error in case something really is wrong.
-        app_log.error("Permission error sending signal %i to PID %i."
-        " Assuming this means that our process is gone and another has claimed our PID.",
-        signal, pid)
+        app_log.error(
+            "Permission error sending signal %i to PID %i."
+            " Assuming this means that our process is gone and another has claimed our PID.",
+            signal,
+            pid,
+        )
         alive = False
     except OSError as e:
         # Uncaught OSError. Something definitely went wrong,
         # but the cause is likely that our process is gone and we are polling something funky.
         # Treat it as if our process is gone,
         # but log the error for diagnostic purposes.
-        app_log.exception("%s sending signal %i to PID %i."
-        " Assuming this means that our process is gone and another has claimed our PID.",
-        e, signal, pid)
+        app_log.exception(
+            "%s sending signal %i to PID %i."
+            " Assuming this means that our process is gone and another has claimed our PID.",
+            e,
+            signal,
+            pid,
+        )
         alive = False
     else:
         alive = True
-    finish({
-        'ok': True,
-        'alive': alive,
-    })
+    finish({'ok': True, 'alive': alive})
+
 
 def spawn(singleuser, args, env):
     """spawn a single-user server
-    
+
     Takes args *not including executable* for security reasons.
     Start the single-user server via `python -m jupyterhub.singleuser`,
     and prohibit PYTHONPATH from env for basic protections.
@@ -90,18 +95,18 @@ def spawn(singleuser, args, env):
     if 'PYTHONPATH' in env:
         app_log.warn("PYTHONPATH env not allowed for security reasons")
         env.pop('PYTHONPATH')
-    
+
     # use fork to prevent zombie process
     # create pipe to get PID from descendant
     r, w = os.pipe()
-    if os.fork(): # parent
+    if os.fork():  # parent
         # wait for data on pipe and relay it to stdout
         os.close(w)
         r = os.fdopen(r)
         sys.stdout.write(r.read())
     else:
         os.close(r)
-        
+
         # don't inherit signals from Hub
         os.setpgrp()
         try:
@@ -115,15 +120,14 @@ def spawn(singleuser, args, env):
             # launch the single-user server from the subprocess
             # TODO: If we want to see single-user log output,
             # we should send stderr to a file
-            p = Popen(cmd, env=env,
+            p = Popen(
+                cmd,
+                env=env,
                 cwd=os.path.expanduser('~'),
                 stdout=sys.stderr.fileno(),
             )
         except Exception as e:
-            result = {
-                'ok': False,
-                'error': str(e)
-            }
+            result = {'ok': False, 'error': str(e)}
         else:
             # give it 1 second to die early
             try:
@@ -131,18 +135,12 @@ def spawn(singleuser, args, env):
             except TimeoutExpired:
                 pass
             if p.returncode:
-                result = {
-                    'ok': False,
-                    'error': 'Exited with status: %s' % p.returncode
-                }
+                result = {'ok': False, 'error': 'Exited with status: %s' % p.returncode}
             else:
-                result = {
-                    'ok': True,
-                    'pid': p.pid
-                }
+                result = {'ok': True, 'pid': p.pid}
         with os.fdopen(w, 'w') as out_pipe:
             finish(result, out_pipe)
-        
+
         # wait for subprocess, so it doesn't get zombified
         p.wait()
 
@@ -156,7 +154,7 @@ def main():
     except ValueError as e:
         app_log.error("Expected JSON on stdin, got %s" % e)
         sys.exit(1)
-    
+
     action = kwargs.pop('action')
     if action == 'kill':
         kill(**kwargs)
@@ -174,4 +172,3 @@ def main():
         spawn(singleuser, **kwargs)
     else:
         raise TypeError("action must be 'spawn' or 'kill'")
-

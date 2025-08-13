@@ -1,5 +1,5 @@
 # Configuration file for jupyterhub
-c = get_config()
+c = get_config()  # noqa
 
 c.JupyterHub.spawner_class = "sudo"
 c.Authenticator.allow_all = True

@@ -18,7 +18,7 @@ import json
 import os
 import sys
 
-from tornado import web, httpserver, ioloop, log
+from tornado import httpserver, ioloop, log, web
 
 
 class EchoHandler(web.RequestHandler):
