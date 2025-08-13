@@ -7,39 +7,59 @@
 [![Issue tracking - GitHub](https://img.shields.io/badge/issue_tracking-github-blue?logo=github)](https://github.com/jupyterhub/sudospawner/issues)
 [![Help forum - Discourse](https://img.shields.io/badge/help_forum-discourse-blue?logo=discourse)](https://discourse.jupyter.org/c/jupyterhub)
 
-The SudoSpawner enables [JupyterHub](https://github.com/jupyter/jupyterhub)
-to spawn single-user servers without being root, by spawning an intermediate
-process via `sudo`, which takes actions on behalf of the user.
+The SudoSpawner, derived from the [LocalProcessSpawner], enables [JupyterHub] to
+spawn single-user servers for other UNIX users without running JupyterHub as the
+root user. This works by granting permissions to use [`sudo`] to start *an
+intermediate process* from a *specific script*.
 
-The ``sudospawner`` mediator, the intermediate process, can only do two things:
+The `sudospawner` mediator script, the intermediate process, can only do two
+things:
 
 1. send a signal to another process using the os.kill() call
 2. spawn single-user servers
 
-Launching the ``sudospawner`` script is the only action that requires a
-JupyterHub administrator to have ``sudo`` access to execute.
+[localprocessspawner]: https://jupyterhub.readthedocs.io/en/5.2.1/reference/api/spawner.html#jupyterhub.spawner.LocalProcessSpawner
+[jupyterhub]: https://github.com/jupyterhub/jupyterhub
+[`sudo`]: https://www.sudo.ws/
 
 ## Installation and setup
 
-1. Install:
+1. Install sudospawner in the Python environment running JupyterHub.
 
-        pip install -e .
+   ```shell
+   pip install sudospawner
+   ```
 
-2. [Add sudo access to the script](https://jupyterhub.readthedocs.io/en/stable/howto/configuration/config-sudo.html).
+2. [Grant a UNIX user sudo access] to the sudospawner mediator script.
 
-3. To configure JupyterHub to use SudoSpawner, add the following to your 
-`jupyterhub_config.py`:
+   <!--
+      This documentation fits better in this project but is currently documented
+      in JupyterHub's own documentation.
+   -->
 
-        c.JupyterHub.spawner_class = "sudo"
+3. To configure JupyterHub to use SudoSpawner, add the following to your
+   `jupyterhub_config.py`:
+
+   ```shell
+   c.JupyterHub.spawner_class = "sudo"
+   ```
     
-   The [JupyterHub documentation](http://jupyterhub.readthedocs.org/en/latest/index.html)
-   has additional information about [creating a configuration file](https://jupyterhub.readthedocs.io/en/latest/getting-started/config-basics.html#generate-a-default-config-file),
-   if needed, and recommended file locations for configuration files.
+   The [JupyterHub documentation] has additional information about [creating a
+   configuration file], if needed, and recommended file locations for
+   configuration files.
 
-If you would like to use JupyterLab, then all you have to do is set the `default_url`
-in `jupyterhub_config.py`:
+[jupyterhub documentation]: http://jupyterhub.readthedocs.org/en/latest/index.html
+[grant a unix user sudo access]: https://jupyterhub.readthedocs.io/en/stable/howto/configuration/config-sudo.html
+[creating a configuration file]: https://jupyterhub.readthedocs.io/en/latest/getting-started/config-basics.html#generate-a-default-config-file
 
-    c.Spawner.default_url = '/lab'
+## Dynamic UNIX user creation
+
+A JupyterHub Authenticator can be configured to create UNIX users when needed.
+This however require the UNIX user running JupyterHub to have permissions to do
+so.
+
+Until this is documented better in this README (help wanted),
+please refer to the [discussion in issue #58](https://github.com/jupyterhub/sudospawner/issues/58#issuecomment-894105911).
 
 ## Custom singleuser launch command
 
@@ -73,4 +93,7 @@ exec "$(dirname "$0")/jupyterhub-singleuser" $@
 
 ## Example
 
-The [Dockerfile](https://github.com/jupyter/sudospawner/blob/master/examples/Dockerfile) in this repo contains an example configuration for setting up a JupyterHub system, without any need to run anything as root.
+The [examples Dockerfile] and associated files provides an example configuration
+for setting up a JupyterHub system, without any need to run anything as root.
+
+[example dockerfile]: https://github.com/jupyterhub/sudospawner/blob/main/examples/Dockerfile
