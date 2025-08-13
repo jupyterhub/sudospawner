@@ -1,11 +1,21 @@
 name: Test
 
-# Trigger the workflow's on all PRs but only on pushed tags or commits to
-# main/master branch to avoid PRs developed in a GitHub fork's dedicated branch
-# to trigger.
 on:
   pull_request:
+    paths-ignore:
+      - ".github/workflows/*.yaml"
+      - "!.github/workflows/test.yaml"
   push:
+    paths-ignore:
+      - ".github/workflows/*.yaml"
+      - "!.github/workflows/test.yaml"
+    branches-ignore:
+      - "dependabot/**"
+      - "pre-commit-ci-update-config"
+    tags: ["**"]
+  schedule:
+    # At 05:00 on Monday - https://crontab.guru
+    - cron: "0 5 * * 1"
   workflow_dispatch:
 
 jobs:
