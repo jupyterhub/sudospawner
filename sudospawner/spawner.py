@@ -8,29 +8,29 @@ This spawns a mediator process with sudo, which then takes actions on behalf of 
 
 
 import json
+import os
 import shutil
 import sys
-import os
-import warnings
-
-from tornado.ioloop import IOLoop
-from tornado.iostream import StreamClosedError
-from tornado.process import Subprocess
-
-from traitlets import List, Unicode, Bool
 
 from jupyterhub.spawner import LocalProcessSpawner
 from jupyterhub.utils import random_port
+from tornado.ioloop import IOLoop
+from tornado.iostream import StreamClosedError
+from tornado.process import Subprocess
+from traitlets import List, Unicode
+
 
 class SudoSpawner(LocalProcessSpawner):
 
-    sudospawner_path = Unicode(shutil.which('sudospawner') or 'sudospawner', config=True,
-        help="Path to sudospawner script"
+    sudospawner_path = Unicode(
+        shutil.which('sudospawner') or 'sudospawner',
+        config=True,
+        help="Path to sudospawner script",
     )
-    sudo_args = List(['-nH'], config=True,
-        help="Extra args to pass to sudo"
-    )
-    mediator_log_level = Unicode("INFO", config=True,
+    sudo_args = List(['-nH'], config=True, help="Extra args to pass to sudo")
+    mediator_log_level = Unicode(
+        "INFO",
+        config=True,
         help="Log level for the mediator process",
     )
 
@@ -63,23 +63,31 @@ class SudoSpawner(LocalProcessSpawner):
             cmd.append(f'--logging={self.mediator_log_level}')
 
         self.log.debug("Spawning %s", cmd)
-        p = Subprocess(cmd, stdin=Subprocess.STREAM, stdout=Subprocess.STREAM, stderr=Subprocess.STREAM, preexec_fn=self.make_preexec_fn())
+        p = Subprocess(
+            cmd,
+            stdin=Subprocess.STREAM,
+            stdout=Subprocess.STREAM,
+            stderr=Subprocess.STREAM,
+            preexec_fn=self.make_preexec_fn(),
+        )
         stderr_future = self.relog_stderr(p.stderr)
         # hand the stderr future to the IOLoop so it isn't orphaned,
         # even though we aren't going to wait for it unless there's an error
-        IOLoop.current().add_callback(lambda : stderr_future)
+        IOLoop.current().add_callback(lambda: stderr_future)
 
         await p.stdin.write(json.dumps(kwargs).encode('utf8'))
         p.stdin.close()
         data = await p.stdout.read_until_close()
         if p.returncode:
             await stderr_future
-            raise RuntimeError("sudospawner subprocess failed with exit code: %r" % p.returncode)
+            raise RuntimeError(
+                "sudospawner subprocess failed with exit code: %r" % p.returncode
+            )
 
         data_str = data.decode('utf8', 'replace')
 
         try:
-            data_str = data_str[data_str.index('{'):data_str.rindex('}')+1]
+            data_str = data_str[data_str.index('{') : data_str.rindex('}') + 1]
             response = json.loads(data_str)
         except ValueError:
             self.log.error("Failed to get JSON result from mediator: %r" % data_str)

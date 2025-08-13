@@ -9,8 +9,8 @@
 
 The SudoSpawner, derived from the [LocalProcessSpawner], enables [JupyterHub] to
 spawn single-user servers for other UNIX users without running JupyterHub as the
-root user. This works by granting permissions to use [`sudo`] to start *an
-intermediate process* from a *specific script*.
+root user. This works by granting permissions to use [`sudo`] to start _an
+intermediate process_ from a _specific script_.
 
 The `sudospawner` mediator script, the intermediate process, can only do two
 things:
@@ -43,7 +43,7 @@ things:
    ```shell
    c.JupyterHub.spawner_class = "sudo"
    ```
-    
+
    The [JupyterHub documentation] has additional information about [creating a
    configuration file], if needed, and recommended file locations for
    configuration files.
@@ -74,7 +74,7 @@ You may want to initialize user environment variables before launching the serve
 If you install a script called `sudospawner-singleuser` next to `sudospawner`,
 this will be used instead of the direct `jupyterhub-singleuser` command.
 
-For example, you might want to spawn notebook servers from conda environments that are revised and deployed separately from your hub instance. 
+For example, you might want to spawn notebook servers from conda environments that are revised and deployed separately from your hub instance.
 
 ```bash
 #!/bin/bash -l
