@@ -74,7 +74,7 @@ def kill(pid, signal):
         alive = True
     finish({
         'ok': True,
-        'alive': alive,
+        'alive': alive
     })
 
 def spawn(singleuser, args, env):
