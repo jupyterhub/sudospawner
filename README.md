@@ -30,7 +30,7 @@ JupyterHub administrator to have ``sudo`` access to execute.
 3. To configure JupyterHub to use SudoSpawner, add the following to your 
 `jupyterhub_config.py`:
 
-        c.JupyterHub.spawner_class='sudospawner.SudoSpawner'
+        c.JupyterHub.spawner_class = "sudo"
     
    The [JupyterHub documentation](http://jupyterhub.readthedocs.org/en/latest/index.html)
    has additional information about [creating a configuration file](https://jupyterhub.readthedocs.io/en/latest/getting-started/config-basics.html#generate-a-default-config-file),
