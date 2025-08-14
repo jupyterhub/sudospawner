@@ -1,7 +1,7 @@
 include LICENSE
 include README.md
 
-graft examples
+graft example
 
 prune build
 exclude jupyterhub.sqlite

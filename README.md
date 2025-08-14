@@ -93,7 +93,7 @@ exec "$(dirname "$0")/jupyterhub-singleuser" $@
 
 ## Example
 
-The [examples Dockerfile] and associated files provides an example configuration
-for setting up a JupyterHub system, without any need to run anything as root.
+The [example folder] provides an example configuration for setting up a
+JupyterHub system, without any need to run anything as root.
 
-[example dockerfile]: https://github.com/jupyterhub/sudospawner/blob/main/examples/Dockerfile
+[example folder]: https://github.com/jupyterhub/sudospawner/tree/main/example
