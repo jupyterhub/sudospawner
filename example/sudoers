@@ -1,4 +1,4 @@
-# An example sudoers file added to /etc/sudoers.d/sudospawner
+# An example sudoers file to be added to /etc/sudoers.d/sudospawner
 #
 # sudoers file reference
 # https://www.sudo.ws/docs/man/sudoers.man/

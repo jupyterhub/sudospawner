@@ -1,6 +1,6 @@
 # example showing sudo config
 # build from root with:
-#    docker build -t jupyterhub-sudo -f examples/Dockerfile .
+#    docker build -t jupyterhub-sudo -f example/Dockerfile .
 # run with:
 #    docker run -it -p 8000:8000 jupyterhub-sudo
 # visit http://127.0.0.1:8000 and login with username: io, password: io
@@ -19,7 +19,7 @@ RUN python3 -m pip install jupyterlab
 RUN useradd -m -G shadow -p $(openssl passwd -1 rhea) rhea
 
 # Give rhea passwordless sudo access to run the sudospawner mediator on behalf of users:
-COPY examples/sudoers /etc/sudoers.d/sudospawner
+COPY example/sudoers /etc/sudoers.d/sudospawner
 
 # add some regular users
 RUN for name in io europa; do \
@@ -34,4 +34,4 @@ RUN python3 -m pip install .
 RUN chown rhea .
 
 USER rhea
-COPY examples/jupyterhub_config.py ./jupyterhub_config.py
+COPY example/jupyterhub_config.py ./jupyterhub_config.py
