@@ -46,10 +46,6 @@
 - Bump actions/setup-python from 5 to 6 [#101](https://github.com/jupyterhub/sudospawner/pull/101) ([@consideRatio](https://github.com/consideRatio))
 - Bump actions/checkout from 4 to 5 [#92](https://github.com/jupyterhub/sudospawner/pull/92) ([@manics](https://github.com/manics))
 - ci: add release workflow without pypa action [#69](https://github.com/jupyterhub/sudospawner/pull/69) ([@consideRatio](https://github.com/consideRatio), [@minrk](https://github.com/minrk))
-
-#### Other merged PRs
-
-- [pre-commit.ci] pre-commit autoupdate [#102](https://github.com/jupyterhub/sudospawner/pull/102) ([@consideRatio](https://github.com/consideRatio))
 - Use GitHub Actions [#66](https://github.com/jupyterhub/sudospawner/pull/66) ([@kinow](https://github.com/kinow), [@minrk](https://github.com/minrk))
 
 #### Contributors to this release
