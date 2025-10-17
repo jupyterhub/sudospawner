@@ -12,7 +12,7 @@ build-backend = "setuptools.build_meta"
 #
 [project]
 name = "sudospawner"
-version = "0.6.0.dev"
+version = "1.0.0"
 description = "SudoSpawner: Spawner for JupyterHub using sudo"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -76,7 +76,7 @@ testpaths = ["sudospawner/tests"]
 github_url = "https://github.com/jupyterhub/sudospawner"
 
 [tool.tbump.version]
-current = "0.6.0.dev"
+current = "1.0.0"
 regex = '''
     (?P<major>\d+)
     \.
