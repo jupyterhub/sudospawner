@@ -6,21 +6,8 @@ from unittest.mock import Mock
 
 import pytest
 import requests
-from tornado import ioloop
 
 from sudospawner import SudoSpawner
-
-
-@pytest.fixture(scope="module")
-def io_loop(request):
-    """Same as pytest-tornado.io_loop, but re-scoped to module-level"""
-    io_loop = ioloop.IOLoop.current()
-
-    def _close():
-        io_loop.close()
-
-    request.addfinalizer(_close)
-    return io_loop
 
 
 @pytest.fixture
@@ -84,28 +71,26 @@ class MockSudoSpawner(SudoSpawner):
         return [f"--port={self.port}"]
 
 
-@pytest.mark.gen_test
-def test_spawn(user):
+async def test_spawn(user):
     spawner = MockSudoSpawner(user=user)
-    ip, port = yield spawner.start()
+    ip, port = await spawner.start()
     pid = spawner.pid
-    status = yield spawner.poll()
+    status = await spawner.poll()
     assert status is None
     url = f"http://{ip}:{port}"
     r = requests.get(url)
     r.raise_for_status()
-    yield spawner.stop()
+    await spawner.stop()
     # check that the process is gone
     with pytest.raises(ProcessLookupError):
         os.kill(pid, 0)
 
 
-@pytest.mark.gen_test
-def test_poll(user):
+async def test_poll(user):
     spawner = MockSudoSpawner(user=user)
-    ip, port = yield spawner.start()
+    ip, port = await spawner.start()
     pid = spawner.pid
-    status = yield spawner.poll()
+    status = await spawner.poll()
     assert status is None
     os.kill(pid, 9)
     for i in range(10):
@@ -115,21 +100,20 @@ def test_poll(user):
             break
         else:
             time.sleep(1)
-    status = yield spawner.poll()
+    status = await spawner.poll()
     assert isinstance(status, int)
 
 
-@pytest.mark.gen_test(timeout=10)
-def test_env(user):
+async def test_env(user):
     spawner = MockSudoSpawner(user=user)
     spawner.environment["TEST_KEY"] = "TEST_VALUE"
-    ip, port = yield spawner.start()
-    status = yield spawner.poll()
+    ip, port = await spawner.start()
+    status = await spawner.poll()
     time.sleep(1)
     assert status is None
     url = f"http://{ip}:{port}/env"
     r = requests.get(url)
-    yield spawner.stop()
+    await spawner.stop()
     r.raise_for_status()
     env = r.json()
     assert "TEST_KEY" in env
