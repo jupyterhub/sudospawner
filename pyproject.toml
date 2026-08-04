@@ -48,7 +48,7 @@ sudo = "sudospawner:SudoSpawner"
 test = [
     "pytest",
     "pytest-cov",
-    "pytest-tornado",
+    "pytest-asyncio",
     "requests",
 ]
 
@@ -65,6 +65,8 @@ Issues = "https://github.com/jupyterhub/sudospawner/issues"
 [tool.pytest.ini_options]
 addopts = "--verbose --color=yes --durations=10"
 testpaths = ["sudospawner/tests"]
+asyncio_mode = "auto"
+
 
 
 # tbump is used to simplify and standardize the release process when updating
